@@ -1,0 +1,23 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Helper function to check authentication
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    // User profile and cloud preferences
+    match /users/{userId} {
+      allow read, write, delete: if isAuthenticated() && request.auth.uid == userId;
+      match /{subcollection}/{document=**} {
+        allow read, write, delete: if isAuthenticated() && request.auth.uid == userId;
+      }
+    }
+    
+    // Public produce catalogs / global botanic guides
+    match /produce_catalog/{produceId} {
+      allow read: if true;
+      allow write: if true;
+    }
+  }
+}
